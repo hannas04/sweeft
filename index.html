@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SWEEFT | Events & Lifestyle</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@200;300;400;600&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+        :root {
+            --black: #1a1a1a;
+            --white: #ffffff;
+            --cream: #f9f7f2;
+            --accent: #c5a059;
+            --gray: #666;
+            --transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { 
+            font-family: 'Montserrat', sans-serif; 
+            background: var(--white); 
+            color: var(--black); 
+            overflow-x: hidden; 
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 5%;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        nav.scrolled { padding: 1rem 5%; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        .nav-logo { height: 50px; width: auto; object-fit: contain; }
+        .nav-links { display: flex; list-style: none; }
+        .nav-links li { margin-left: 2rem; }
+        .nav-links a { text-decoration: none; color: var(--black); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; position: relative; }
+        .nav-links a::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px; background: var(--accent); transition: width 0.3s ease; }
+        .nav-links a:hover::after { width: 100%; }
+        .burger { display: none; cursor: pointer; z-index: 1001; }
+        .burger div { width: 25px; height: 2px; background-color: var(--black); margin: 5px; }
+
+        /* Hero Slider */
+        .hero-slider { height: 100vh; width: 100%; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; text-align: center; }
+        .hero-slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; opacity: 0; transition: opacity 1.5s ease-in-out; z-index: 1; }
+        .hero-slide.active { opacity: 1; z-index: 2; }
+        .hero-slide::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); }
+        .hero-content { position: relative; z-index: 10; color: white; padding: 0 5%; }
+        .hero-content h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 8vw, 5rem); margin-bottom: 1.5rem; }
+
+        /* Horizontal Section - Mobile Fixed */
+        .horizontal-container { overflow: hidden; background: var(--black); position: relative; }
+        .horizontal-wrapper { display: flex; width: 300%; height: 100vh; align-items: center; }
+        .horizontal-item { width: 100vw; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 0 5%; }
+        .horizontal-item h2 { color: white; text-align: center; margin-bottom: 2rem; }
+        .horizontal-item .image-card { width: 85vw; max-width: 900px; height: 55vh; max-height: 500px; }
+
+        /* Common Section Styles */
+        section { padding: 8rem 10%; min-height: 60vh; display: flex; flex-direction: column; justify-content: center; }
+        .section-tag { color: var(--accent); text-transform: uppercase; letter-spacing: 4px; font-size: 0.7rem; margin-bottom: 1rem; display: block; }
+        h2 { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 5vw, 3rem); margin-bottom: 2rem; font-weight: 400; }
+        p { max-width: 700px; font-weight: 300; color: var(--gray); margin-bottom: 2rem; line-height: 1.8; }
+        .alt-bg { background-color: var(--cream); }
+
+        /* Cards & Grids */
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; margin-top: 3rem; }
+        .card { padding: 3rem 2rem; background: var(--cream); text-align: center; transition: var(--transition); border-radius: 4px; position: relative; overflow: hidden; }
+        .card:hover { transform: translateY(-10px); background: #f0ede6; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        
+        .image-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 3rem; }
+        .image-card { position: relative; height: 400px; overflow: hidden; cursor: pointer; border-radius: 4px; }
+        .image-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.7)); z-index: 1; }
+        .image-placeholder { width: 100%; height: 100%; object-fit: cover; transition: var(--transition); }
+        .image-card:hover .image-placeholder { transform: scale(1.1); }
+        .image-caption { position: absolute; bottom: 2rem; left: 2rem; z-index: 2; color: white; }
+
+        .portfolio-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 3rem; }
+        .portfolio-item { position: relative; height: 350px; overflow: hidden; }
+        .portfolio-item:nth-child(1) { grid-column: span 2; grid-row: span 2; }
+        .portfolio-item:nth-child(4) { grid-column: span 2; }
+
+        /* Stats & Parallax */
+        .stats-section { background: var(--black); color: var(--white); text-align: center; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 3rem; margin-top: 3rem; }
+        .stat-item h3 { font-family: 'Playfair Display', serif; font-size: 3rem; color: var(--accent); }
+        
+        .parallax-section { position: relative; min-height: 500px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #1a1a1a 0%, #3a3a3a 100%); color: white; text-align: center; }
+        .parallax-section h2 { font-size: 3rem; }
+
+        /* Modern Form */
+        .contact-form { display: grid; gap: 1.5rem; max-width: 800px; margin-top: 2rem; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        input, select, textarea { width: 100%; padding: 12px 0; border: none; border-bottom: 1px solid #1a1a1a; background: transparent; font-family: inherit; }
+        input:focus { outline: none; border-bottom: 2px solid var(--accent); }
+        .btn { padding: 1rem 2.5rem; border: 1px solid var(--black); text-decoration: none; color: var(--black); text-transform: uppercase; font-size: 0.7rem; letter-spacing: 2px; transition: 0.4s; cursor: pointer; background: transparent; display: inline-block; }
+        .btn:hover { background: var(--black); color: white; }
+
+        /* Modern Footer */
+        .modern-footer { background: var(--black); color: var(--white); padding: 5rem 10% 2rem; }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1.5fr; gap: 4rem; padding-bottom: 3rem; }
+        .footer-brand h3 { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--accent); margin-bottom: 1rem; }
+        .footer-links h4 { color: var(--accent); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 1.5rem; }
+        .footer-links ul { list-style: none; }
+        .footer-links li { margin-bottom: 0.8rem; }
+        .footer-links a { color: rgba(255,255,255,0.6); text-decoration: none; transition: 0.3s; }
+        .footer-links a:hover { color: white; padding-left: 5px; }
+        .footer-social { display: flex; gap: 1.5rem; margin-top: 1.5rem; }
+        .footer-social a { color: white; text-decoration: none; border: 1px solid rgba(255,255,255,0.2); padding: 10px; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+        .footer-social a:hover { background: var(--accent); border-color: var(--accent); transform: translateY(-5px); }
+        .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 2rem; text-align: center; color: rgba(255,255,255,0.4); font-size: 0.7rem; }
+
+        @media screen and (max-width: 768px) {
+            .nav-links { position: fixed; right: 0; height: 100vh; top: 0; background: white; width: 75%; transform: translateX(100%); transition: 0.5s; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
+            .nav-active { transform: translateX(0); }
+            .burger { display: block; }
+            .form-row { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr; gap: 3rem; }
+            section { padding: 5rem 8%; }
+            .portfolio-grid { grid-template-columns: 1fr; }
+        }
+
+        .reveal { opacity: 0; transform: translateY(30px); transition: var(--transition); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body>
+
+    <nav id="navbar" style="background-color: #ffffff;">
+        <img src="logo.jpg" alt="SWEEFT Logo" class="nav-logo">
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#curation">Curation</a></li>
+            <li><a href="#events">Events</a></li>
+            <li><a href="#gallery">Gallery</a></li>
+            <li><a href="#weddings">Weddings</a></li>
+            <li><a href="#travel">Travel</a></li>
+            <li><a href="#about">Our Story</a></li>
+            <li><a href="#contact">Inquire</a></li>
+        </ul>
+        <div class="burger">
+            <div class="line1"></div><div class="line2"></div><div class="line3"></div>
+        </div>
+    </nav>
+
+    <section class="hero-slider" id="home">
+        <div class="hero-slide active" style="background-image: url('wedding-1.jpg');"></div>
+        <div class="hero-slide" style="background-image: url('wedding-2.jpg');"></div>
+        <div class="hero-slide" style="background-image: url('gala-1.jpg');"></div>
+        <div class="hero-content">
+            <h1>Elevated <i>Living</i> & <br> Iconic Moments</h1>
+            <p>The premier destination for bespoke event production and curated lifestyle management.</p>
+            <a href="https://wa.me/2349050725099" class="btn" style="color: white; border-color: white;">Start Your Journey</a>
+        </div>
+    </section>
+
+    <section id="curation">
+        <span class="section-tag">Philosophy</span>
+        <h2 class="reveal">The Art of Curation</h2>
+        <p class="reveal">We believe that luxury isn't about excess; it's about the precision of choice. Every element we select for our clients serves a purpose and tells a story.</p>
+    </section>
+
+    <section class="alt-bg" id="events">
+        <span class="section-tag">Services</span>
+        <h2 class="reveal">Private Events</h2>
+        <div class="grid-3">
+            <div class="card reveal"><h3>Galas</h3><p>Sophisticated high-impact events for those who value excellence.</p></div>
+            <div class="card reveal"><h3>Dinners</h3><p>Intimate, candle-lit experiences with Michelin-star standard catering.</p></div>
+            <div class="card reveal"><h3>Product Launches</h3><p>Transforming brand visions into immersive physical realities.</p></div>
+        </div>
+    </section>
+
+    <div class="horizontal-container" id="gallery">
+        <div class="horizontal-wrapper">
+            <div class="horizontal-item">
+                <span class="section-tag" style="color: white;">Showcase</span>
+                <h2>Monte Carlo Grand Ballroom</h2>
+                <div class="image-card">
+                    <img src="wedding-1.jpg" class="image-placeholder">
+                    <div class="image-caption"><h3>Gala Night</h3><p>Monaco, 2025</p></div>
+                </div>
+            </div>
+            <div class="horizontal-item">
+                <h2>Private Villa Dinner</h2>
+                <div class="image-card">
+                    <img src="wedding-2.jpg" class="image-placeholder">
+                    <div class="image-caption"><h3>Lake Como</h3><p>Italy</p></div>
+                </div>
+            </div>
+            <div class="horizontal-item">
+                <h2>Fashion Week Launch</h2>
+                <div class="image-card">
+                    <img src="gala-1.jpg" class="image-placeholder">
+                    <div class="image-caption"><h3>Paris</h3><p>France</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="stats-section">
+        <h2 class="reveal">Excellence in Numbers</h2>
+        <div class="stats-grid">
+            <div class="stat-item reveal"><h3 data-target="500">500+</h3><p>Events Curated</p></div>
+            <div class="stat-item reveal"><h3 data-target="50">50+</h3><p>Countries Served</p></div>
+            <div class="stat-item reveal"><h3 data-target="98">98%</h3><p>Client Satisfaction</p></div>
+            <div class="stat-item reveal"><h3>24/7</h3><p>Concierge Support</p></div>
+        </div>
+    </section>
+
+    <section id="weddings">
+        <span class="section-tag">Matrimony</span>
+        <h2 class="reveal">Destination Weddings</h2>
+        <p class="reveal">From the rolling hills of Tuscany to the white sands of the Maldives, we handle the logistics so you can focus on the love.</p>
+        <div class="portfolio-grid reveal">
+            <div class="portfolio-item image-card"><img src="Tuscan Villa-wedding.jpg" class="image-placeholder"></div>
+            <div class="portfolio-item image-card"><img src="beach wedding.jpg" class="image-placeholder"></div>
+            <div class="portfolio-item image-card"><img src="garden party.jpg" class="image-placeholder"></div>
+            <div class="portfolio-item image-card"><img src="castle-wedding.jpg" class="image-placeholder"></div>
+            <div class="portfolio-item image-card"><img src="desert weddig.jpg" class="image-placeholder"></div>
+        </div>
+    </section>
+
+    <section class="parallax-section">
+        <div class="reveal">
+            <h2>"Details make perfection, and perfection is not a detail."</h2>
+            <p style="margin-top: 1rem;">— The SWEEFT Standard</p>
+        </div>
+    </section>
+
+    <section class="alt-bg" id="travel">
+        <span class="section-tag">Travel</span>
+        <h2 class="reveal">Bespoke Itineraries</h2>
+        <p class="reveal">Access the inaccessible. We provide private villa bookings and yacht charters across the globe.</p>
+        <div class="image-gallery reveal">
+            <div class="image-card"><img src="yatch party.jpg" class="image-placeholder"><div class="image-caption"><h3>Mediterranean Cruise</h3></div></div>
+            <div class="image-card"><img src="Private Villa Dinner.jpg" class="image-placeholder"><div class="image-caption"><h3>Exclusive Retreat</h3></div></div>
+            <div class="image-card"><img src="Safari -party.jpg" class="image-placeholder"><div class="image-caption"><h3>Luxury Safari</h3></div></div>
+        </div>
+    </section>
+
+    <section id="about">
+        <span class="section-tag">The Brand</span>
+        <h2 class="reveal">Our Story</h2>
+        <p class="reveal">Founded on the principle of "Effortless Elegance," SWEEFT has grown into a global network of curators dedicated to the extraordinary. With offices in London, Paris, and New York, we bring decades of combined experience in luxury hospitality and event design.</p>
+    </section>
+
+    <section class="alt-bg" id="contact">
+        <span class="section-tag">Inquire</span>
+        <h2 class="reveal">Let's Connect</h2>
+        <form class="contact-form reveal">
+            <div class="form-group"><label>Email *</label><input type="email" placeholder="example@mail.com" required></div>
+            <div class="form-group"><label>Company Name *</label><input type="text" placeholder="Your company name"></div>
+            <div class="form-row">
+                <div class="form-group"><label>Select Service *</label><select required><option value="">What Event are you planning</option><option>Wedding</option><option>Social</option><option>Corporate</option></select></div>
+                <div class="form-group"><label>Project Budget *</label><select required><option value="">Select Your Range</option><option>$10k - $30k</option><option>$30k - $70k</option><option>$70k+</option></select></div>
+            </div>
+            <div class="form-group"><label>Project Details</label><textarea rows="4" placeholder="Tell us more about your project"></textarea></div>
+            <button class="btn">Send Inquiry</button>
+        </form>
+    </section>
+
+    <footer class="modern-footer">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <h3>SWEEFT</h3>
+                <p>Curating extraordinary moments and elevated lifestyles since 2015. Bespoke event production for discerning clients worldwide.</p>
+                <div class="footer-social">
+                    <a href="#">IG</a><a href="#">FB</a><a href="#">TW</a><a href="#">LI</a>
+                </div>
+            </div>
+            <div class="footer-links">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="#events">Private Events</a></li>
+                    <li><a href="#weddings">Weddings</a></li>
+                    <li><a href="#travel">Bespoke Travel</a></li>
+                    <li><a href="#curation">Curation</a></li>
+                </ul>
+            </div>
+            <div class="footer-contact">
+                <h4>Contact</h4>
+                <p>sweeftevents@gmail.com</p>
+                <p>+234 905 072 5099</p>
+                <a href="https://wa.me/2349050725099" class="btn" style="color: white; border-color: rgba(255,255,255,0.3); margin-top: 1rem;">WhatsApp Us</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2026 SWEEFT EVENTS & LIFESTYLE | ALL RIGHTS RESERVED | PRIVACY POLICY | TERMS</p>
+        </div>
+    </footer>
+
+    <script>
+        // Hero Slider
+        let cur = 0;
+        const s = document.querySelectorAll('.hero-slide');
+        setInterval(() => {
+            s[cur].classList.remove('active');
+            cur = (cur + 1) % s.length;
+            s[cur].classList.add('active');
+        }, 5000);
+
+        // GSAP Horizontal Scroll
+        gsap.registerPlugin(ScrollTrigger);
+        let items = gsap.utils.toArray(".horizontal-item");
+        gsap.to(items, {
+            xPercent: -100 * (items.length - 1),
+            ease: "none",
+            scrollTrigger: {
+                trigger: ".horizontal-container",
+                pin: true,
+                scrub: 1,
+                end: () => "+=" + document.querySelector(".horizontal-wrapper").offsetWidth
+            }
+        });
+
+        // Navbar & Reveal Logic
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if(window.scrollY > 100) nav.classList.add('scrolled');
+            else nav.classList.remove('scrolled');
+
+            document.querySelectorAll('.reveal').forEach(el => {
+                if(el.getBoundingClientRect().top < window.innerHeight - 100) el.classList.add('active');
+            });
+        });
+
+        document.querySelector('.burger').addEventListener('click', () => {
+            document.querySelector('.nav-links').classList.toggle('nav-active');
+        });
+    </script>
+</body>
+</html>d
